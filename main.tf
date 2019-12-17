@@ -58,7 +58,7 @@ resource "google_compute_firewall" "k8s-firewall-external" {
   }
   source_ranges	= ["0.0.0.0/0"]
 }
-
+/*
 resource "google_compute_firewall" "k8s-firewall-lb-probe" {
   name		= "k8s-allow-lb-probe"
   network	= "${google_compute_network.vpc.self_link}"
@@ -67,7 +67,7 @@ resource "google_compute_firewall" "k8s-firewall-lb-probe" {
   }
   source_ranges	= ["35.191.0.0/16","209.85.152.0/22", "209.85.204.0/22"]
 }
-
+*/
 resource "google_compute_address" "lb_ext_ip" {
   name	= "lb-ext-ip"
 }
@@ -79,7 +79,7 @@ resource "google_dns_record_set" "k8s_lbs" {
   managed_zone = "ysung-tips"
   rrdatas = ["${google_compute_address.lb_ext_ip.address}"]
 }
-
+/*
 resource "google_compute_http_health_check" "k8s_api_health_check" {
   name	= "k8s-api-health-check"
   host	= "kubernetes.default.svc.k8s.ysung.tips"
@@ -98,7 +98,7 @@ resource "google_compute_forwarding_rule" "k8s-api-lb-forwarding" {
   ip_address	= "${google_compute_address.lb_ext_ip.address}"
   port_range	= "6443"
 }
-
+*/
 resource "google_compute_instance" "k8s-master" {
   count = var.master_count 
   name		= "k8s-master${count.index + 1}"
@@ -117,6 +117,7 @@ resource "google_compute_instance" "k8s-master" {
     subnetwork	= "${google_compute_subnetwork.subnet.self_link}"
     network_ip	= cidrhost(var.subnet_cidr, count.index+11)
     access_config {
+      nat_ip = "${google_compute_address.lb_ext_ip.address}"
     }
   }
   can_ip_forward	= true
